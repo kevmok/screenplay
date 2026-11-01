@@ -185,7 +185,7 @@ export interface KeysConfig {
 }
 
 export interface ExploreConfig {
-  /** Where `takeone explore` writes the inventory index. Default ".takeone/inventory.json". */
+  /** Where `screenplay explore` writes the inventory index. Default ".screenplay/inventory.json". */
   index: string;
   /** Max elements to inventory per page. Default 250. */
   max: number;
@@ -217,7 +217,7 @@ export interface ScenarioConfig {
   keys: KeysConfig;
   dryRun: DryRunConfig;
   explore: ExploreConfig;
-  /** Path to the inventory index used to resolve @eNN handles. Default ".takeone/inventory.json". */
+  /** Path to the inventory index used to resolve @eNN handles. Default ".screenplay/inventory.json". */
   indexPath?: string;
 }
 

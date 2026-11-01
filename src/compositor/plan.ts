@@ -47,7 +47,7 @@ interface Piece {
 
 /**
  * An idle event's edit mode. Manifests get edited by hand, so a factor of 1 or less plays in
- * real time, and a value takeone doesn't know is an error rather than a silent trim.
+ * real time, and a value screenplay doesn't know is an error rather than a silent trim.
  */
 function editMode(ev: Extract<RecordedEvent, { type: "idle" }>): WaitEdit {
   const edit: unknown = ev.edit ?? "keep";

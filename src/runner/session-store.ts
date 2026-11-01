@@ -1,6 +1,6 @@
 /**
- * A persistent browser session: `takeone session start` launches a headless Chromium once,
- * logs in once, and stays alive. Later `takeone` commands attach to it over CDP, so exploring
+ * A persistent browser session: `screenplay session start` launches a headless Chromium once,
+ * logs in once, and stays alive. Later `screenplay` commands attach to it over CDP, so exploring
  * and inspecting a logged-in app costs nothing per call.
  */
 import { mkdirSync, readFileSync, writeFileSync, existsSync, rmSync, statSync } from "node:fs";
@@ -21,7 +21,7 @@ export interface SessionInfo {
   /** URL the session is currently on. */
   url?: string;
   note?: string;
-  /** Port of the daemon's command server (`takeone do`, `look`, journal). */
+  /** Port of the daemon's command server (`screenplay do`, `look`, journal). */
   controlPort?: number;
   /** Scenario file the session took its login setup from. */
   scenario?: string;
@@ -30,25 +30,25 @@ export interface SessionInfo {
   setupError?: string;
   /** Why the browser did not start, left by a daemon that exited during startup. */
   startError?: string;
-  /** Build of the daemon that runs this session, to notice a session left over from an older takeone. */
+  /** Build of the daemon that runs this session, to notice a session left over from an older screenplay. */
   build?: string;
 }
 
-export const DEFAULT_SESSION_FILE = ".takeone/session.json";
+export const DEFAULT_SESSION_FILE = ".screenplay/session.json";
 export const DEFAULT_SESSION_PORT = 9222;
 
-/** The session's debugging port. TAKEONE_SESSION_PORT gives a second agent on the same machine its own browser. */
-export const sessionPort = () => Number(process.env.TAKEONE_SESSION_PORT || DEFAULT_SESSION_PORT);
+/** The session's debugging port. SCREENPLAY_SESSION_PORT gives a second agent on the same machine its own browser. */
+export const sessionPort = () => Number(process.env.SCREENPLAY_SESSION_PORT || DEFAULT_SESSION_PORT);
 /**
  * A session on another port gets its own profile and state folder (session file, journal), so a
  * second agent in the same folder never attaches to the first one's browser. The default port
  * keeps the paths it always had.
  */
-export const profileFor = (port: number) => (port === DEFAULT_SESSION_PORT ? "/tmp/takeone-session" : `/tmp/takeone-session-${port}`);
-const sessionFileFor = (port: number) => (port === DEFAULT_SESSION_PORT ? DEFAULT_SESSION_FILE : `.takeone/session-${port}/session.json`);
+export const profileFor = (port: number) => (port === DEFAULT_SESSION_PORT ? "/tmp/screenplay-session" : `/tmp/screenplay-session-${port}`);
+const sessionFileFor = (port: number) => (port === DEFAULT_SESSION_PORT ? DEFAULT_SESSION_FILE : `.screenplay/session-${port}/session.json`);
 
 export function sessionFile(path?: string): string {
-  return resolve(path ?? process.env.TAKEONE_SESSION_FILE ?? sessionFileFor(sessionPort()));
+  return resolve(path ?? process.env.SCREENPLAY_SESSION_FILE ?? sessionFileFor(sessionPort()));
 }
 
 export function readSession(path?: string): SessionInfo | null {
@@ -98,7 +98,7 @@ export function startSessionDaemon(opts: {
   const cfg = resolveConfig(opts.config);
   ensureChromium(cfg.browser);
   // Checked here rather than in the daemon, whose output nobody sees, and made absolute so
-  // a relative path always means the folder takeone was run in.
+  // a relative path always means the folder screenplay was run in.
   const storageState = resolveStorageState(cfg.browser);
   const args = [
     daemonEntry(),
@@ -113,7 +113,7 @@ export function startSessionDaemon(opts: {
   const child = spawn(process.execPath, args, {
     detached: true,
     stdio: "ignore",
-    env: { ...process.env, TAKEONE_SESSION_DAEMON: "1" },
+    env: { ...process.env, SCREENPLAY_SESSION_DAEMON: "1" },
   });
   child.unref();
   return { pid: child.pid ?? -1 };
@@ -178,10 +178,10 @@ export interface CommandReply {
  * takes over 300s: a `wait-for` may take longer, and the daemon's own budget ends every command.
  */
 export async function sendCommand(info: SessionInfo, path: string, body: unknown): Promise<CommandReply> {
-  if (!info.controlPort) throw new Error("This session was started by an older takeone. Run `takeone session stop` and start it again.");
+  if (!info.controlPort) throw new Error("This session was started by an older screenplay. Run `screenplay session stop` and start it again.");
   const port = info.controlPort;
   const text = await new Promise<string>((done, fail) => {
-    const failed = (e: Error) => fail(new Error(`The session on port ${info.port} did not answer (${e.message}). \`takeone session status\` shows whether it is still running.`));
+    const failed = (e: Error) => fail(new Error(`The session on port ${info.port} did not answer (${e.message}). \`screenplay session status\` shows whether it is still running.`));
     const req = request({ host: "127.0.0.1", port, path, method: "POST", agent: false }, (res) => {
       let data = "";
       res.setEncoding("utf8");
@@ -210,7 +210,7 @@ export async function waitForSession(pid: number, timeoutMs = 90000, path?: stri
         clearSession(path);
         throw new Error(`The session browser did not start with the profile ${failed.userDataDir}: ${failed.startError}`);
       }
-      throw new Error("The session daemon exited during startup. `takeone setup` checks that Chromium starts on this machine.");
+      throw new Error("The session daemon exited during startup. `screenplay setup` checks that Chromium starts on this machine.");
     }
   }
   throw new Error(`Session did not become ready within ${timeoutMs / 1000}s (login setup still running?).`);
@@ -218,13 +218,13 @@ export async function waitForSession(pid: number, timeoutMs = 90000, path?: stri
 
 /**
  * The running session, starting one when there is none. Commands that need a live
- * browser call this, so an agent never has to remember `takeone session start`.
+ * browser call this, so an agent never has to remember `screenplay session start`.
  */
 export async function ensureSession(opts: { scenario?: string; url?: string; config?: UserScenarioConfig; log?: (msg: string) => void } = {}): Promise<SessionInfo> {
   const existing = readSession();
   if (existing && existing.controlPort && (await sessionAlive(existing))) {
     if (existing.build !== daemonBuild())
-      opts.log?.("note: this session was started by an older takeone build, so it runs the old code. `takeone session stop` picks up the update (the journal starts over).");
+      opts.log?.("note: this session was started by an older screenplay build, so it runs the old code. `screenplay session stop` picks up the update (the journal starts over).");
     return existing;
   }
   if (existing) {

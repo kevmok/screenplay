@@ -4,7 +4,7 @@ import { existsSync } from "node:fs";
 import type { BrowserConfig, ViewportConfig } from "./types.js";
 
 export function resolveExecutablePath(cfg: BrowserConfig): string | undefined {
-  const fromEnv = process.env.TAKEONE_CHROMIUM_PATH;
+  const fromEnv = process.env.SCREENPLAY_CHROMIUM_PATH;
   const p = cfg.executablePath ?? fromEnv;
   if (p) {
     if (!existsSync(p)) throw new Error(`Chromium executable not found at ${p}`);
@@ -55,7 +55,7 @@ export interface LaunchedBrowser {
 }
 
 /**
- * The storage state file, resolved from the folder takeone was run in. A missing file stops
+ * The storage state file, resolved from the folder screenplay was run in. A missing file stops
  * the run: going on without it would rehearse or record the app logged out.
  */
 export function resolveStorageState(cfg: BrowserConfig): string | undefined {
@@ -64,7 +64,7 @@ export function resolveStorageState(cfg: BrowserConfig): string | undefined {
   // Playwright also takes the state itself as an object; only a path needs resolving.
   if (typeof state !== "string") return state;
   const file = resolvePath(state);
-  if (!existsSync(file)) throw new Error(`Storage state file not found at ${file}. Save a login with \`takeone login --url <app> -o ${state}\`, or point browser.storageState at an existing file.`);
+  if (!existsSync(file)) throw new Error(`Storage state file not found at ${file}. Save a login with \`screenplay login --url <app> -o ${state}\`, or point browser.storageState at an existing file.`);
   return file;
 }
 
@@ -128,7 +128,7 @@ export async function launchBrowser(cfg: BrowserConfig, viewport: ViewportConfig
 }
 
 /**
- * Connect to a browser started by `takeone session start`, instead of launching one. The
+ * Connect to a browser started by `screenplay session start`, instead of launching one. The
  * returned handle never closes the browser: the daemon owns its lifetime.
  */
 export async function connectToSession(port: number, cfg: BrowserConfig): Promise<LaunchedBrowser> {

@@ -1,17 +1,17 @@
 {
-  "name": "takeone",
-  "version": "0.1.2-fork.5",
+  "name": "screenplay",
+  "version": "0.2.0",
   "description": "Scripted, agent-friendly screen recordings of web apps with Screen Studio style cursor, zoom and framing. Runs headless.",
   "type": "module",
   "license": "MIT",
-  "author": "Atharva Deosthale",
+  "author": "Kevin Mok",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/atharvadeosthale/takeone.git"
+    "url": "git+https://github.com/kevmok/screenplay.git"
   },
-  "homepage": "https://github.com/atharvadeosthale/takeone#readme",
+  "homepage": "https://github.com/kevmok/screenplay#readme",
   "bugs": {
-    "url": "https://github.com/atharvadeosthale/takeone/issues"
+    "url": "https://github.com/kevmok/screenplay/issues"
   },
   "keywords": [
     "screen-recording",
@@ -24,7 +24,7 @@
     "screen-studio"
   ],
   "bin": {
-    "takeone": "./dist/cli.js"
+    "screenplay": "./dist/cli.js"
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

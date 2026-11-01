@@ -1,4 +1,4 @@
-# takeone scenario API
+# screenplay scenario API
 
 Read this when you edit an exported scenario by hand or write one from scratch. You do not need it for rehearsing.
 
@@ -14,7 +14,7 @@ Read this when you edit an exported scenario by hand or write one from scratch. 
 ## Scenario file
 
 ```ts
-import { defineScenario } from "takeone";
+import { defineScenario } from "screenplay";
 
 export default defineScenario(
   {
@@ -148,10 +148,10 @@ These work on `record`, `dry-run` and `render`:
 - `--scale 0.35`, for a cheaper contact sheet
 - `--fast`, which skips pacing. It's quicker, but not the run the recording will be
 
-`record --no-render` captures only, and `takeone render <dir>` renders it later.
+`record --no-render` captures only, and `screenplay render <dir>` renders it later.
 
 `render` saves the look settings it is given (`output`, `frame`, `cursor`, `zoom`, `idleTrim`, `keys`) in the recording's `manifest.json` as `renderConfig`. Every render applies the recorded `config`, then `renderConfig`, then its own flags, so a re-render without flags keeps the latest look. `render --reset-look` starts again from the recorded `config`.
 
-For login state from a real browser: `takeone login --url <app> -o state.json`. This needs a display, so run it on a laptop. Log in, then press Enter or close the window (with `--profile`, only Enter works). Without a terminal, add `--wait-for-url <regex>` to save once a tab reaches a logged-in URL, and `--timeout <seconds>` to give up instead of waiting forever. Then set `browser.storageState: "state.json"`.
+For login state from a real browser: `screenplay login --url <app> -o state.json`. This needs a display, so run it on a laptop. Log in, then press Enter or close the window (with `--profile`, only Enter works). Without a terminal, add `--wait-for-url <regex>` to save once a tab reaches a logged-in URL, and `--timeout <seconds>` to give up instead of waiting forever. Then set `browser.storageState: "state.json"`.
 
-`record`, `dry-run` and the live session load the file before any setup runs. A relative path is read from the folder takeone runs in, and a missing file is an error. With `--profile`, the file replaces the profile's cookies, and the storage of each site in the file.
+`record`, `dry-run` and the live session load the file before any setup runs. A relative path is read from the folder screenplay runs in, and a missing file is an error. With `--profile`, the file replaces the profile's cookies, and the storage of each site in the file.

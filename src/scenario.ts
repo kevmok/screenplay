@@ -2,7 +2,7 @@ import type { Page } from "playwright";
 import type { UserScenarioConfig } from "./types.js";
 import type { Session } from "./runner/session.js";
 
-/** A page `takeone explore` should inventory. */
+/** A page `screenplay explore` should inventory. */
 export interface ExplorePage {
   /** Path (joined with `baseUrl`), an absolute URL, or `"auto"` for the current page. */
   path: string;
@@ -15,7 +15,7 @@ export interface ExplorePage {
 }
 
 /**
- * An exploration plan, so `takeone explore scenario.ts` can walk the pages a recording needs
+ * An exploration plan, so `screenplay explore scenario.ts` can walk the pages a recording needs
  * and produce handles for them. Optional: scenarios without one are recorded normally.
  */
 export interface ExplorePlan {
@@ -29,7 +29,7 @@ export interface ExplorePlan {
 export interface Scenario {
   config: UserScenarioConfig;
   run: (s: Session) => Promise<void>;
-  /** Optional exploration plan consumed by `takeone explore`. */
+  /** Optional exploration plan consumed by `screenplay explore`. */
   explore?: ExplorePlan;
 }
 
@@ -52,7 +52,7 @@ export function defineScenario(a: UserScenarioConfig | ((s: Session) => Promise<
   return { config: a, run: b };
 }
 
-/** Attach an exploration plan to a scenario so `takeone explore` knows what to walk. */
+/** Attach an exploration plan to a scenario so `screenplay explore` knows what to walk. */
 export function withExplore(scenario: Scenario, plan: ExplorePlan): Scenario {
   return { ...scenario, explore: plan };
 }
