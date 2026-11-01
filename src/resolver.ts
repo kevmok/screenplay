@@ -91,7 +91,7 @@ export interface AvrIndex {
 }
 
 /** Stable file the CLI writes and the runner reads, so handles work across commands. */
-export const DEFAULT_INDEX_PATH = ".takeone/inventory.json";
+export const DEFAULT_INDEX_PATH = ".screenplay/inventory.json";
 
 export function indexFromPages(pages: InventoryPage[]): AvrIndex {
   return {

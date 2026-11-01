@@ -83,7 +83,7 @@ export async function recordScenario(scenario: Scenario, opts: RecordOptions): P
   // manifest is written before exiting; Playwright's exit handler then kills the browser.
   const interrupt = (signal: NodeJS.Signals) => {
     const kept = save(capture.written(), Date.now() - started).manifest.frames.length;
-    log(`Stopped by ${signal}.${kept ? ` The ${kept} frames captured so far were kept. \`takeone render ${opts.outDir}\` renders them as a partial video.` : ""}`);
+    log(`Stopped by ${signal}.${kept ? ` The ${kept} frames captured so far were kept. \`screenplay render ${opts.outDir}\` renders them as a partial video.` : ""}`);
     process.exit(signal === "SIGINT" ? 130 : 143);
   };
   process.on("SIGINT", interrupt);
@@ -106,7 +106,7 @@ export async function recordScenario(scenario: Scenario, opts: RecordOptions): P
   // A failed run keeps what it captured: minutes of footage should never vanish with the error.
   if (error) {
     const e = error instanceof Error ? error : new Error(String(error));
-    if (kept.length) e.message += `\n\nThe ${kept.length} frames captured before the failure were kept. \`takeone render ${opts.outDir}\` renders them as a partial video.`;
+    if (kept.length) e.message += `\n\nThe ${kept.length} frames captured before the failure were kept. \`screenplay render ${opts.outDir}\` renders them as a partial video.`;
     throw e;
   }
   return { outDir, manifestPath, manifest };

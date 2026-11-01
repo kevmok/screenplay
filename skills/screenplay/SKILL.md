@@ -1,17 +1,17 @@
 ---
-name: takeone
-description: Record polished Screen Studio style videos of web apps (smooth cursor, click ripples, eased zooms, padded frame) with the takeone MCP server, CLI or TypeScript SDK, including installing and setting it up from nothing. Use this whenever the user wants a demo video, product walkthrough, feature clip, tutorial recording, launch video or screen recording of a website or web app, even if they don't name takeone, and whenever a project has takeone scenario files or a .takeone folder.
+name: screenplay
+description: Record polished Screen Studio style videos of web apps (smooth cursor, click ripples, eased zooms, padded frame) with the screenplay MCP server, CLI or TypeScript SDK, including installing and setting it up from nothing. Use this whenever the user wants a demo video, product walkthrough, feature clip, tutorial recording, launch video or screen recording of a website or web app, even if they don't name screenplay, and whenever a project has screenplay scenario files or a .screenplay folder.
 ---
 
-# takeone
+# screenplay
 
-takeone records web apps headlessly. You rehearse the video in a live browser, the rehearsal becomes a scenario file, and the scenario is replayed on its own clock to record. Your thinking time never shows in the video, and the cursor, zoom and frame are applied afterwards, so a take can be restyled without recording again.
+screenplay records web apps headlessly. You rehearse the video in a live browser, the rehearsal becomes a scenario file, and the scenario is replayed on its own clock to record. Your thinking time never shows in the video, and the cursor, zoom and frame are applied afterwards, so a take can be restyled without recording again.
 
 The workflow has five stages, in this order:
 
 1. **Rehearse.** Click through the app live. Every step shows you the page.
 2. **Mark** where the video starts.
-3. **Export.** takeone replays the path to prove it works, then writes the scenario.
+3. **Export.** screenplay replays the path to prove it works, then writes the scenario.
 4. **Dry run.** Runs at recording pace and returns a contact sheet (one image with a frame per step).
 5. **Record.** Captures and renders the video.
 
@@ -19,47 +19,47 @@ The workflow has five stages, in this order:
 
 Do this once per project, before the first recording. Each step is safe to repeat.
 
-1. **Check whether it is already installed.** If `package.json` (in the project or a `videos/` folder) lists `takeone`, skip to step 4.
+1. **Check whether it is already installed.** If `package.json` (in the project or a `videos/` folder) lists `screenplay`, skip to step 4.
 2. **Check Node.** `node -v` must be 20 or newer. If Node is missing or older, tell the user and stop: nothing else works without it.
-3. **Install the package where the scenarios will live.** Exported scenarios run `import … from "takeone"`, so the package has to be installed next to them.
-   - **A JavaScript or TypeScript project** (it has a `package.json`): add takeone as a dev dependency with the project's own package manager, which the lockfile tells you: `npm i -D takeone`, `pnpm add -D takeone`, `yarn add -D takeone` or `bun add -d takeone`.
+3. **Install the package where the scenarios will live.** Exported scenarios run `import … from "screenplay"`, so the package has to be installed next to them.
+   - **A JavaScript or TypeScript project** (it has a `package.json`): add screenplay as a dev dependency with the project's own package manager, which the lockfile tells you: `npm i -D screenplay`, `pnpm add -D screenplay`, `yarn add -D screenplay` or `bun add -d screenplay`.
    - **Anything else, or when the app's dependencies should stay untouched:** give the videos their own folder.
      ```bash
-     mkdir -p videos && cd videos && npm init -y && npm pkg set type=module && npm i -D takeone
+     mkdir -p videos && cd videos && npm init -y && npm pkg set type=module && npm i -D screenplay
      ```
-     Run every takeone command from that folder. Scenario files, the `.takeone/` state folder and `recordings/` all stay in it.
+     Run every screenplay command from that folder. Scenario files, the `.screenplay/` state folder and `recordings/` all stay in it.
 
-   The CLI comes with the package: run it as `npx takeone <command>`. `npx takeone guide` prints the whole workflow on one screen. A global install (`npm i -g takeone`) gives a bare `takeone` command, but scenarios still need the local install.
-4. **Prepare the machine.** Run `npx takeone setup`. It:
+   The CLI comes with the package: run it as `npx screenplay <command>`. `npx screenplay guide` prints the whole workflow on one screen. A global install (`npm i -g screenplay`) gives a bare `screenplay` command, but scenarios still need the local install.
+4. **Prepare the machine.** Run `npx screenplay setup`. It:
    - downloads Chromium (about 650 MB, once per machine)
    - checks ffmpeg, which ships with the package
    - starts a headless browser to prove recording will work
 
-   It ends with `Ready.` or with `✗` lines that say what is wrong. On a Linux server, missing system libraries are the usual failure. Fix them with `npx takeone setup --with-deps`, which needs sudo. If you can't use sudo, give the user that command to run.
+   It ends with `Ready.` or with `✗` lines that say what is wrong. On a Linux server, missing system libraries are the usual failure. Fix them with `npx screenplay setup --with-deps`, which needs sudo. If you can't use sudo, give the user that command to run.
 5. **Register the MCP server (optional, recommended).** Its replies carry the screenshot, so one call both acts and shows the page. Register it for the agent you are running in:
    ```bash
-   claude mcp add takeone -- npx -y takeone mcp     # Claude Code
-   codex mcp add takeone -- npx -y takeone mcp      # Codex
+   claude mcp add screenplay -- npx -y screenplay mcp     # Claude Code
+   codex mcp add screenplay -- npx -y screenplay mcp      # Codex
    ```
-   Other clients take `{"command": "npx", "args": ["-y", "takeone", "mcp"]}` in their MCP config.
+   Other clients take `{"command": "npx", "args": ["-y", "screenplay", "mcp"]}` in their MCP config.
 
    MCP servers load when a session starts, so the tools only appear in the next session. Don't wait for them: use the CLI for the rest of this session, and tell the user that restarting gives them the MCP tools. The MCP server and the CLI share one browser session, so switching between them loses nothing.
 
-To update later, run `npm i -D takeone@latest`, then `npx takeone session stop` so the running browser session picks up the new version.
+To update later, run `npm i -D screenplay@latest`, then `npx screenplay session stop` so the running browser session picks up the new version.
 
 ## The commands
 
 | Step | MCP tool | CLI |
 |---|---|---|
-| Start, optionally with login | `takeone_start {scenario, url, headed, viewport}` | first command with `--scenario login.ts` |
-| Act | `takeone_do {verb, target, text}` | `npx takeone do <verb> <target> [text]` |
-| Look at the page | `takeone_look {filter, role, all}` | `npx takeone look` |
-| Mark | `takeone_mark {name: "start"}` | `npx takeone mark start` |
-| Journal | `takeone_journal {action, ids}` | `npx takeone journal [drop\|keep\|setup] 3-5` |
-| Export | `takeone_export {file}` | `npx takeone session export demo.ts` |
-| Dry run | `takeone_dry_run {file}` | `npx takeone dry-run demo.ts` |
-| Record | `takeone_record {file}` | `npx takeone record demo.ts` |
-| Stop the browser | `takeone_stop` | `npx takeone session stop` |
+| Start, optionally with login | `screenplay_start {scenario, url, headed, viewport}` | first command with `--scenario login.ts` |
+| Act | `screenplay_do {verb, target, text}` | `npx screenplay do <verb> <target> [text]` |
+| Look at the page | `screenplay_look {filter, role, all}` | `npx screenplay look` |
+| Mark | `screenplay_mark {name: "start"}` | `npx screenplay mark start` |
+| Journal | `screenplay_journal {action, ids}` | `npx screenplay journal [drop\|keep\|setup] 3-5` |
+| Export | `screenplay_export {file}` | `npx screenplay session export demo.ts` |
+| Dry run | `screenplay_dry_run {file}` | `npx screenplay dry-run demo.ts` |
+| Record | `screenplay_record {file}` | `npx screenplay record demo.ts` |
+| Stop the browser | `screenplay_stop` | `npx screenplay session stop` |
 
 Verbs: `goto`, `click`, `type`, `press`, `hover`, `scroll`, `scroll-to`, `wait-for`, `wait-url`, `wait`, `zoom`, `zoom-out`.
 
@@ -100,7 +100,7 @@ This diff is usually all you need to decide the next step, so don't call `look` 
 
 Targets can also be plain words (`"new project"`), `role:name` (`button:Create`), `text=Deployed`, `css=.monaco-editor`, or a point `640,360`. For a control whose name is a number, use `button:2`.
 
-Every line in the view is read from markup. takeone never clicks anything to find out what it does. That is deliberate: a Delete or Create button tried in the background would really run.
+Every line in the view is read from markup. screenplay never clicks anything to find out what it does. That is deliberate: a Delete or Create button tried in the background would really run.
 
 ## Which command when
 
@@ -120,7 +120,7 @@ Every line in the view is read from markup. takeone never clicks anything to fin
 | Checking the whole video before recording | `dry-run`, then read the contact sheet | `record` first: a failed take costs minutes |
 | A quick path check while editing the scenario | `dry-run --fast` | treating a fast pass as proof the recording will pass |
 | Changing only the look (background, cursor, size) | `render <recording-dir>` with other config | recording again |
-| Finished, or after updating takeone | `session stop` | leaving the browser running |
+| Finished, or after updating screenplay | `session stop` | leaving the browser running |
 
 `explore` and `find` are older commands for inventorying pages by URL. The view and `look --filter` cover the same ground with less work.
 
@@ -141,7 +141,7 @@ Every line in the view is read from markup. takeone never clicks anything to fin
 4. **Export.** It replays the kept steps in a fresh tab first. If the replay fails, the error names the step and shows what the page said.
    - The exported file uses role and name addresses, never view numbers.
    - Names that include a live count or badge are written as patterns. For example, `"Issues 157"` becomes `/^Issues(?![\w.])/`.
-   - Exporting into an existing file replaces only the block between `// takeone:steps-begin` and `// takeone:steps-end`, so your edits outside it are kept.
+   - Exporting into an existing file replaces only the block between `// screenplay:steps-begin` and `// screenplay:steps-end`, so your edits outside it are kept.
 5. **Dry run before recording.** It paces the page exactly as the recording will, so a dry run that passes means a recording that passes. Look at the contact sheet: it is the cheapest review of the whole video.
 6. **Record.** The result is `recordings/<name>-<time>/output.mp4`, plus a keyframe sheet for checking the take.
 
@@ -152,7 +152,7 @@ The exported file is ordinary TypeScript. Edit its timing (`s.wait`), typing spe
 Put the login in a scenario's `explore.setup`, then start the session with that file. The session logs in once and every later step reuses it. The exported scenario imports that file and runs the same login before recording.
 
 ```ts
-import { defineScenario, withExplore } from "takeone";
+import { defineScenario, withExplore } from "screenplay";
 
 export default withExplore(defineScenario({ name: "login" }, async () => {}), {
   pages: [],
@@ -170,7 +170,7 @@ export default withExplore(defineScenario({ name: "login" }, async () => {}), {
 
 Read credentials from environment variables. Never write them into the file.
 
-A login saved with `takeone login` works too. Set `browser.storageState` in the scenario's config to the file. The session loads it before `explore.setup` runs, so the scenario needs no setup. A relative path is read from the folder takeone runs in.
+A login saved with `screenplay login` works too. Set `browser.storageState` in the scenario's config to the file. The session loads it before `explore.setup` runs, so the scenario needs no setup. A relative path is read from the folder screenplay runs in.
 
 `session stop` keeps the session's cookies, session cookies included, so a session started again on the same profile is still logged in.
 
@@ -180,7 +180,7 @@ A login saved with `takeone login` works too. Set `browser.storageState` in the 
 
 - **Zoom for the viewer, not for every click.** Automatic zoom already follows clicks and typing, and `zoom.auto` controls it. Add an explicit `zoom` when the viewer needs to read something: a result, a status, a value that changed. Hold it for about 1.5 s, then `zoom-out` before the cursor travels far. Two to four deliberate zooms per minute reads better than constant motion. To turn automatic zoom off for a section, call `s.autoZoom(false)`.
 - **Show slow steps honestly.** A wait plays in real time by default. `s.lapse(8, () => …)` shows a long wait as a time-lapse; `s.trim(() => …)` cuts it down.
-- **Capture crisp.** The default is a 1920x1080 viewport at `deviceScaleFactor: 2`, which keeps zooms sharp. Output size is set separately (`output.width`, `output.height`, `output.fps`); for 4K output, capture at `deviceScaleFactor: 3`. Restyle an existing take without recording again: `takeone render <recording-dir>` with other `frame`, `cursor` or `output` settings. The take keeps that look for later renders; `--reset-look` goes back to the recorded one.
+- **Capture crisp.** The default is a 1920x1080 viewport at `deviceScaleFactor: 2`, which keeps zooms sharp. Output size is set separately (`output.width`, `output.height`, `output.fps`); for 4K output, capture at `deviceScaleFactor: 3`. Restyle an existing take without recording again: `screenplay render <recording-dir>` with other `frame`, `cursor` or `output` settings. The take keeps that look for later renders; `--reset-look` goes back to the recorded one.
 - **Prefer short takes.** Several short scenarios are easier to get right than one long one. `record --no-render` followed by `render` separates capturing from styling.
 
 ## Things that cost time if you don't know them
@@ -190,15 +190,15 @@ A login saved with `takeone login` works too. Set `browser.storageState` in the 
 - **Key sequences are fast in the recording.** In a rehearsal, two separate `press` calls can miss a shortcut's timing window, for example `g` then `i`. The exported scenario runs them back to back, so check with a dry run before assuming the app is broken.
 - **Page problems appear as `!` lines.** A 401 or a crash is shown as `! HTTP 401 …` in the step output. A "login page" or "not found" in an error means the URL or the authentication is wrong, not the element name.
 - **Nothing hangs.** Every command gives up with an error instead of waiting forever, so don't wrap commands in long timeouts. Named targets wait up to `browser.timeout` (15 s) for the element to appear.
-- **Two agents on one machine need separate sessions.** Set `TAKEONE_SESSION_PORT=9322` for the second one; it gets its own browser, profile and journal, even in the same folder.
-- **An updated takeone doesn't reach a running session.** A session started before an update keeps running the old code. The CLI warns about this. Run `takeone session stop` to restart it.
+- **Two agents on one machine need separate sessions.** Set `SCREENPLAY_SESSION_PORT=9322` for the second one; it gets its own browser, profile and journal, even in the same folder.
+- **An updated screenplay doesn't reach a running session.** A session started before an update keeps running the old code. The CLI warns about this. Run `screenplay session stop` to restart it.
 
 ## SDK
 
 Scenarios are TypeScript modules, and the runner can be used from code:
 
 ```ts
-import { recordScenario, renderRecording, dryRunScenario } from "takeone";
+import { recordScenario, renderRecording, dryRunScenario } from "screenplay";
 import scenario from "./demo.js";
 
 const rec = await recordScenario(scenario, { outDir: "out/demo" });

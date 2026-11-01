@@ -1,13 +1,13 @@
-# takeone
+# screenplay
 
 Your coding agent records polished demo videos of web apps. You get a smooth cursor, click ripples, eased zooms and a padded frame, the look Screen Studio made popular. It renders headless, so it runs on a Linux server as well as a Mac.
 
-An agent driving a browser live makes a jumpy video, because every pause while the model thinks ends up on camera. takeone splits the job in two. The agent rehearses in a live browser, and the rehearsal becomes a script. The script then replays on its own clock, so the video never waits on the model. The cursor, zoom and frame are drawn afterwards, which means you can restyle a take without recording it again.
+An agent driving a browser live makes a jumpy video, because every pause while the model thinks ends up on camera. screenplay splits the job in two. The agent rehearses in a live browser, and the rehearsal becomes a script. The script then replays on its own clock, so the video never waits on the model. The cursor, zoom and frame are drawn afterwards, which means you can restyle a take without recording it again.
 
 ## Get started
 
 ```bash
-npx skills add atharvadeosthale/takeone
+npx skills add kevmok/screenplay
 ```
 
 Then ask your agent for a video:
@@ -26,32 +26,32 @@ It works with Claude Code, Codex, Cursor and the other agents the [skills CLI](h
 
 ### The MCP server
 
-Agents can drive takeone through its CLI, but the MCP server is faster. Each MCP reply carries a screenshot, so one call acts on the page and shows the result.
+Agents can drive screenplay through its CLI, but the MCP server is faster. Each MCP reply carries a screenshot, so one call acts on the page and shows the result.
 
 ```bash
-claude mcp add takeone -- npx -y takeone mcp
-codex mcp add takeone -- npx -y takeone mcp
+claude mcp add screenplay -- npx -y screenplay mcp
+codex mcp add screenplay -- npx -y screenplay mcp
 ```
 
-Other clients take `{"command": "npx", "args": ["-y", "takeone", "mcp"]}`. The MCP server and the CLI share one browser, so an agent can switch between them mid-task.
+Other clients take `{"command": "npx", "args": ["-y", "screenplay", "mcp"]}`. The MCP server and the CLI share one browser, so an agent can switch between them mid-task.
 
 ## Doing it yourself
 
 Everything the agent does, you can do yourself from a terminal.
 
 ```bash
-npm i -D takeone
-npx takeone setup
+npm i -D screenplay
+npx screenplay setup
 ```
 
-`setup` downloads Chromium once, about 650 MB. Then it checks ffmpeg and starts a headless browser to prove everything works. If a Linux server is missing Chromium's system libraries, `npx takeone setup --with-deps` installs them with sudo.
+`setup` downloads Chromium once, about 650 MB. Then it checks ffmpeg and starts a headless browser to prove everything works. If a Linux server is missing Chromium's system libraries, `npx screenplay setup --with-deps` installs them with sudo.
 
 ### Rehearse
 
 The first command opens the browser. Every command prints what's on screen, numbered, grouped by region, with what each element does:
 
 ```
-$ npx takeone do goto http://localhost:3000
+$ npx screenplay do goto http://localhost:3000
 ✓ #1 await s.goto("http://localhost:3000/");
 /  "Acme Dashboard"
 nav
@@ -62,14 +62,14 @@ main
   5 textbox "Project name"
   6 button "Create project"
   7 button [icon ellipsis] (opens menu)
-view: /tmp/takeone-view-9222/001-step1.jpg (the 1920x1080 page, scaled down)
+view: /tmp/screenplay-view-9222/001-step1.jpg (the 1920x1080 page, scaled down)
 ```
 
 The `view:` file is a screenshot with the same numbers drawn on it. Act by number:
 
 ```
-$ npx takeone do type 5 "acme-prod"
-$ npx takeone do click 6
+$ npx screenplay do type 5 "acme-prod"
+$ npx screenplay do click 6
 ✓ #3 await s.click({ role: "button", name: "Create project" });
   matched 6 button "Create project"
 + 8 status "Creating acme-prod…"
@@ -77,21 +77,21 @@ $ npx takeone do click 6
 
 After the first view, each step prints only what changed. `+` marks new elements, `-` removed ones, and `~` changed state. Alerts and page errors show up too.
 
-takeone reads each element's purpose from the page's markup. It never clicks anything to find out what it does, because a Delete button clicked just to see what it does would really delete.
+screenplay reads each element's purpose from the page's markup. It never clicks anything to find out what it does, because a Delete button clicked just to see what it does would really delete.
 
 You can also name targets in plain words (`click "create project"`), as `role:name` (`button:Create`), with `text=…` or `css=…`, or as a point (`640,360`).
 
 ### Mark, export, record
 
 ```bash
-npx takeone mark start                # the video starts here; anything earlier was looking around
-npx takeone do zoom 8                 # a camera move, nothing on the page changes
-npx takeone session export demo.ts    # replays the path to prove it, then writes the scenario
-npx takeone dry-run demo.ts           # full recording pace, one contact sheet image
-npx takeone record demo.ts            # recordings/demo-<time>/output.mp4
+npx screenplay mark start                # the video starts here; anything earlier was looking around
+npx screenplay do zoom 8                 # a camera move, nothing on the page changes
+npx screenplay session export demo.ts    # replays the path to prove it, then writes the scenario
+npx screenplay dry-run demo.ts           # full recording pace, one contact sheet image
+npx screenplay record demo.ts            # recordings/demo-<time>/output.mp4
 ```
 
-Steps that bring the page back to an earlier state, like opening a menu and closing it again, are dropped from the export automatically. `npx takeone journal` shows where every step landed and lets you keep or drop any of them.
+Steps that bring the page back to an earlier state, like opening a menu and closing it again, are dropped from the export automatically. `npx screenplay journal` shows where every step landed and lets you keep or drop any of them.
 
 A dry run paces the page exactly like the recording, so if the dry run passes, the recording will too. Check the contact sheet before you record.
 
@@ -100,7 +100,7 @@ A dry run paces the page exactly like the recording, so if the dry run passes, t
 The export is a plain TypeScript file, and you can edit it by hand:
 
 ```ts
-import { defineScenario } from "takeone";
+import { defineScenario } from "screenplay";
 
 export default defineScenario({ name: "create-project" }, async (s) => {
   await s.goto("http://localhost:3000/projects");
@@ -119,9 +119,9 @@ export default defineScenario({ name: "create-project" }, async (s) => {
 
 Anything before `startRecording()` stays out of the video. Targets name what an element is, `{ role, name }`, rather than where it sits in the DOM, so a scenario keeps working through markup changes.
 
-Re-exporting into the same file only replaces the steps between the `// takeone:steps-begin` and `// takeone:steps-end` markers. Your config, helpers and edits outside those markers are kept.
+Re-exporting into the same file only replaces the steps between the `// screenplay:steps-begin` and `// screenplay:steps-end` markers. Your config, helpers and edits outside those markers are kept.
 
-The full API, with every method, option and config key, is in [`skills/takeone/references/scenario-api.md`](skills/takeone/references/scenario-api.md).
+The full API, with every method, option and config key, is in [`skills/screenplay/references/scenario-api.md`](skills/screenplay/references/scenario-api.md).
 
 ## The look
 
@@ -138,7 +138,7 @@ defineScenario({
 }, async (s) => { /* … */ });
 ```
 
-A recording keeps its raw frames, so `npx takeone render recordings/demo-<time>` renders it again with a different background, cursor or size. Nothing is recorded again. The recording also remembers the look of its latest render, so a later `render` without flags, say after editing `manifest.json`, keeps that look. `--reset-look` goes back to the look it was recorded with.
+A recording keeps its raw frames, so `npx screenplay render recordings/demo-<time>` renders it again with a different background, cursor or size. Nothing is recorded again. The recording also remembers the look of its latest render, so a later `render` without flags, say after editing `manifest.json`, keeps that look. `--reset-look` goes back to the look it was recorded with.
 
 Waits play in real time by default, because a 20 second deploy is part of the story. `s.lapse(8, () => …)` shows a long wait as a time-lapse. `s.trim(() => …)` cuts it short. A cut never lands in the middle of a zoom, and a time-lapse plays zooms at normal speed.
 
@@ -147,7 +147,7 @@ Waits play in real time by default, because a 20 second deploy is part of the st
 Put the login in a scenario's `explore.setup`:
 
 ```ts
-import { defineScenario, withExplore } from "takeone";
+import { defineScenario, withExplore } from "screenplay";
 
 export default withExplore(defineScenario({ name: "login" }, async () => {}), {
   pages: [],
@@ -161,13 +161,13 @@ export default withExplore(defineScenario({ name: "login" }, async () => {}), {
 });
 ```
 
-Start the rehearsal with it: `npx takeone do goto http://localhost:3000 --scenario login.ts`. The session logs in once. Scenarios exported from that session run the same login before they record.
+Start the rehearsal with it: `npx screenplay do goto http://localhost:3000 --scenario login.ts`. The session logs in once. Scenarios exported from that session run the same login before they record.
 
-Stopping the session with `npx takeone session stop` keeps its cookies, session cookies included, so the next session on the same profile is still logged in.
+Stopping the session with `npx screenplay session stop` keeps its cookies, session cookies included, so the next session on the same profile is still logged in.
 
-`npx takeone login --url https://app.example.com -o state.json` saves a real login from a visible browser instead, so it needs a display. Log in, then press Enter or close the window (with `--profile`, only Enter works). Scripts and agents can't press Enter: add `--wait-for-url /dashboard` to save once a tab reaches a URL matching that regular expression, and `--timeout 600` to give up after 600 seconds instead of waiting forever. Point `browser.storageState` at the file.
+`npx screenplay login --url https://app.example.com -o state.json` saves a real login from a visible browser instead, so it needs a display. Log in, then press Enter or close the window (with `--profile`, only Enter works). Scripts and agents can't press Enter: add `--wait-for-url /dashboard` to save once a tab reaches a URL matching that regular expression, and `--timeout 600` to give up after 600 seconds instead of waiting forever. Point `browser.storageState` at the file.
 
-The session, `record` and `dry-run` load the file before any setup runs, so a scenario can log in with the file alone. A relative path is read from the folder you run takeone in. With `--profile`, the file replaces the profile's cookies, and the storage of each site in the file.
+The session, `record` and `dry-run` load the file before any setup runs, so a scenario can log in with the file alone. A relative path is read from the folder you run screenplay in. With `--profile`, the file replaces the profile's cookies, and the storage of each site in the file.
 
 ## How it works
 
@@ -184,6 +184,10 @@ The output is H.264 MP4 by default, or VP9 WebM.
 - Headless Chromium has no GPU, so heavy WebGL pages render slowly.
 - The view doesn't list the hidden text boxes behind code editors and terminals. To type into one, click the editor first, then type with no target.
 
+## Credits
+
+screenplay began as a fork of [takeone](https://github.com/atharvadeosthale/takeone) by Atharva Deosthale, which is no longer maintained. It carries on that work with its own fixes and features.
+
 ## License
 
-MIT
+MIT. See [LICENSE](LICENSE).

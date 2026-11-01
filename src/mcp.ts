@@ -1,5 +1,5 @@
 /**
- * `takeone mcp`: a local MCP server over stdio. It launches Chrome itself (through the same
+ * `screenplay mcp`: a local MCP server over stdio. It launches Chrome itself (through the same
  * session process the CLI uses), so an agent can rehearse, export, dry-run and record a
  * scenario without touching the shell. Every step replies with the numbered outline and the
  * screenshot the numbers are drawn on, in one tool result: act and see in a single call.
@@ -29,26 +29,26 @@ interface ToolResult {
   isError?: boolean;
 }
 
-const INSTRUCTIONS = `takeone records Screen Studio style videos of web apps. You rehearse in a live browser; the rehearsal becomes the scenario; the scenario is recorded on its own clock, so your latency never shows in the video.
+const INSTRUCTIONS = `screenplay records Screen Studio style videos of web apps. You rehearse in a live browser; the rehearsal becomes the scenario; the scenario is recorded on its own clock, so your latency never shows in the video.
 
 LOOP
-1. takeone_do {verb:"goto", target:"<url>"} starts Chrome on the first call. For a logged-in app call takeone_start {scenario:"<file with explore.setup>"} first; it logs in once.
-2. Every takeone_do and takeone_look reply shows the page: every element on screen numbered and grouped by region (header, nav, sidebar, main, dialog), with what the markup says it does (→ link destination, "opens menu", [on]/[selected]/[= value], [icon trash-2]), plus a screenshot with the same numbers drawn on it. Look once, then act by number: takeone_do {verb:"click", target:"12"}.
+1. screenplay_do {verb:"goto", target:"<url>"} starts Chrome on the first call. For a logged-in app call screenplay_start {scenario:"<file with explore.setup>"} first; it logs in once.
+2. Every screenplay_do and screenplay_look reply shows the page: every element on screen numbered and grouped by region (header, nav, sidebar, main, dialog), with what the markup says it does (→ link destination, "opens menu", [on]/[selected]/[= value], [icon trash-2]), plus a screenshot with the same numbers drawn on it. Look once, then act by number: screenplay_do {verb:"click", target:"12"}.
 3. After a step the reply shows what changed: + new elements (numbered), - removed, ~ state changes, alerts, dialogs, page errors (!). A new page or dialog shows the whole numbered view again.
-4. takeone_mark {name:"start"} where the video begins (and optionally {name:"setup"} before it for unrecorded preparation). Steps that return to an earlier state are left out automatically as detours; takeone_journal shows and overrides that.
-5. takeone_export {file:"demo.ts"} replays the kept steps to prove them, then writes the scenario. Numbers are never written: each becomes a role+name address.
-6. takeone_dry_run {file} paces the scenario exactly like the recording and returns a contact sheet. takeone_record {file} captures and renders the video.
+4. screenplay_mark {name:"start"} where the video begins (and optionally {name:"setup"} before it for unrecorded preparation). Steps that return to an earlier state are left out automatically as detours; screenplay_journal shows and overrides that.
+5. screenplay_export {file:"demo.ts"} replays the kept steps to prove them, then writes the scenario. Numbers are never written: each becomes a role+name address.
+6. screenplay_dry_run {file} paces the scenario exactly like the recording and returns a contact sheet. screenplay_record {file} captures and renders the video.
 
 TARGETS: a number from the last view ("12"), plain words ("new project"), role:name ("button:Create"), text=..., css=..., or "x,y". A control literally named with digits: "button:2".
-Zooms are camera moves only: takeone_do {verb:"zoom", target:"7"} / {verb:"zoom-out"}.
+Zooms are camera moves only: screenplay_do {verb:"zoom", target:"7"} / {verb:"zoom-out"}.
 Nothing hangs: every call gives up with an error instead.`;
 
 const TARGET_HELP = 'What to act on. A number from the last view ("12"), plain words ("new project"), role:name ("button:Create"), text=…, css=…, or "x,y". For goto: the URL. press: the key ("Enter", "Control+K"). scroll: pixels ("600"). wait: milliseconds. wait-for: text to wait for. wait-url: a URL regex.';
 
 const TOOLS = [
   {
-    name: "takeone_start",
-    description: "Start (or restart) the browser session. Optional: takeone_do starts one on its own. Use it to log in through a scenario's explore.setup, to open a start URL, or to watch the browser (headed).",
+    name: "screenplay_start",
+    description: "Start (or restart) the browser session. Optional: screenplay_do starts one on its own. Use it to log in through a scenario's explore.setup, to open a start URL, or to watch the browser (headed).",
     inputSchema: {
       type: "object",
       properties: {
@@ -60,7 +60,7 @@ const TOOLS = [
     },
   },
   {
-    name: "takeone_look",
+    name: "screenplay_look",
     description: "Show the current page: every on-screen element numbered and grouped by region, what each does, and a screenshot with the same numbers. Off-screen content is summarised as its headings.",
     inputSchema: {
       type: "object",
@@ -73,7 +73,7 @@ const TOOLS = [
     },
   },
   {
-    name: "takeone_do",
+    name: "screenplay_do",
     description: "Take one step in the live browser, journal it as a scenario line, and see the result: what changed, and the numbered view with its screenshot.",
     inputSchema: {
       type: "object",
@@ -91,12 +91,12 @@ const TOOLS = [
     },
   },
   {
-    name: "takeone_mark",
+    name: "screenplay_mark",
     description: 'Mark a point in the journal. "start": the recording begins here; steps before it were looking around. "setup": unrecorded preparation begins (before "start"). Any other name is a labelled beat.',
     inputSchema: { type: "object", properties: { name: { type: "string" } }, required: ["name"] },
   },
   {
-    name: "takeone_journal",
+    name: "screenplay_journal",
     description: "Show every step taken and where it lands in the export (explore, setup, record, detour, drop, failed), or override: drop/keep/setup step ids, or clear.",
     inputSchema: {
       type: "object",
@@ -107,7 +107,7 @@ const TOOLS = [
     },
   },
   {
-    name: "takeone_export",
+    name: "screenplay_export",
     description: "Replay the kept steps in a fresh tab to prove the path, then write them as a scenario file. Into an existing file, only the marked steps block is replaced.",
     inputSchema: {
       type: "object",
@@ -122,7 +122,7 @@ const TOOLS = [
     },
   },
   {
-    name: "takeone_dry_run",
+    name: "screenplay_dry_run",
     description: "Run a scenario at recording pace without capturing, and return the contact sheet of every step. A dry run that passes is a recording that will pass.",
     inputSchema: {
       type: "object",
@@ -135,19 +135,19 @@ const TOOLS = [
     },
   },
   {
-    name: "takeone_record",
+    name: "screenplay_record",
     description: "Record a scenario and render the video. Returns the video path and a keyframe sheet. Takes as long as the scenario plus rendering.",
     inputSchema: {
       type: "object",
       properties: {
         file: { type: "string" },
-        render: { type: "boolean", description: "Render after capture (default true). false: capture only, render later with `takeone render`" },
+        render: { type: "boolean", description: "Render after capture (default true). false: capture only, render later with `screenplay render`" },
       },
       required: ["file"],
     },
   },
   {
-    name: "takeone_stop",
+    name: "screenplay_stop",
     description: "Close the browser session.",
     inputSchema: { type: "object", properties: {} },
   },
@@ -208,7 +208,7 @@ const tail = (s: string, n = 30) => s.trim().split("\n").slice(-n).join("\n");
 async function call(name: string, a: Record<string, any>): Promise<ToolResult> {
   const shot = a.screenshot !== false;
   switch (name) {
-    case "takeone_start": {
+    case "screenplay_start": {
       await stopSession();
       const config: UserScenarioConfig = {};
       if (a.headed) config.browser = { headless: false };
@@ -224,11 +224,11 @@ async function call(name: string, a: Record<string, any>): Promise<ToolResult> {
       if (info.setupError) out.isError = true;
       return out;
     }
-    case "takeone_look": {
+    case "screenplay_look": {
       const info = await session();
       return reply((await sendCommand(info, "/look", { filter: a.filter, role: a.role, all: a.all })), shot);
     }
-    case "takeone_do": {
+    case "screenplay_do": {
       const verb = String(a.verb);
       const args: string[] = [];
       if (a.target !== undefined && a.target !== null && a.target !== "") args.push(String(a.target));
@@ -244,15 +244,15 @@ async function call(name: string, a: Record<string, any>): Promise<ToolResult> {
       });
       return reply(r, shot);
     }
-    case "takeone_mark": {
+    case "screenplay_mark": {
       const info = await session();
       return reply(await sendCommand(info, "/do", { verb: "mark", args: [String(a.name)] }), false);
     }
-    case "takeone_journal": {
+    case "screenplay_journal": {
       const info = await session();
       return reply(await sendCommand(info, "/journal", { action: a.action, ids: a.ids ?? [] }), false);
     }
-    case "takeone_export": {
+    case "screenplay_export": {
       const info = await session();
       const file = resolve(String(a.file));
       const r = await sendCommand(info, "/export", {
@@ -260,10 +260,10 @@ async function call(name: string, a: Record<string, any>): Promise<ToolResult> {
         verify: a.verify, force: a.force, pkg: packageImport(file), budget: 180000,
       });
       // The CLI's next-step hint, in tool terms.
-      r.lines = r.lines.map((l) => (l.startsWith("Next: takeone record") ? `Next: takeone_dry_run {file: ${JSON.stringify(a.file)}}, then takeone_record.` : l));
+      r.lines = r.lines.map((l) => (l.startsWith("Next: screenplay record") ? `Next: screenplay_dry_run {file: ${JSON.stringify(a.file)}}, then screenplay_record.` : l));
       return reply(r, false);
     }
-    case "takeone_dry_run": {
+    case "screenplay_dry_run": {
       const args = ["dry-run", resolve(String(a.file))];
       if (a.fast) args.push("--fast");
       if (a.scale) args.push("--scale", String(a.scale));
@@ -274,7 +274,7 @@ async function call(name: string, a: Record<string, any>): Promise<ToolResult> {
         : `✗ dry-run did not finish (exit ${r.code})\n${tail(r.stderr, 40)}`;
       return { content: [{ type: "text", text }, ...image(sheet)], isError: r.code !== 0 };
     }
-    case "takeone_record": {
+    case "screenplay_record": {
       const args = ["record", resolve(String(a.file))];
       if (a.render === false) args.push("--no-render");
       const r = await runCli(args);
@@ -282,7 +282,7 @@ async function call(name: string, a: Record<string, any>): Promise<ToolResult> {
       const text = r.json ? `${JSON.stringify(r.json, null, 2)}\n${tail(r.stderr, 12)}` : `✗ record did not finish (exit ${r.code})\n${tail(r.stderr, 40)}`;
       return { content: [{ type: "text", text }, ...image(keyframes)], isError: r.code !== 0 };
     }
-    case "takeone_stop":
+    case "screenplay_stop":
       return { content: [{ type: "text", text: (await stopSession()) ? "Session stopped." : "No session was running." }] };
     default:
       return { content: [{ type: "text", text: `Unknown tool ${name}` }], isError: true };
@@ -322,7 +322,7 @@ export async function runMcpServer(): Promise<void> {
         return ok({
           protocolVersion: msg.params?.protocolVersion ?? "2025-06-18",
           capabilities: { tools: { listChanged: false } },
-          serverInfo: { name: "takeone", version: pkg.version },
+          serverInfo: { name: "screenplay", version: pkg.version },
           instructions: INSTRUCTIONS,
         });
       case "ping":
